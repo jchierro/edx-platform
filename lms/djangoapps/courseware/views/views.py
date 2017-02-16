@@ -726,6 +726,8 @@ def program_marketing(request, program_uuid):
         'title': program_data['title'],
         'status': program_data['status'],
         'courses': program_data['courses'],
+        'avg_price_per_course': program_data['avg_price_per_course'],
+        'full_program_price': program_data['full_program_price'],
         'subtitle': program_data['subtitle'],
         'overview': program_data['overview'],
         'instructors': program_data['instructors'],

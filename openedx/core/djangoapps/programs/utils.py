@@ -315,7 +315,7 @@ class ProgramDataExtender(object):
         enrollment_end = self.course_overview.enrollment_end or datetime.datetime.max.replace(tzinfo=utc)
         run_mode['is_enrollment_open'] = self.enrollment_start <= datetime.datetime.now(utc) < enrollment_end
 
-    def _attach_average_course_price(self, run_mode):
+    def _attach_course_run_course_price(self, run_mode):
         self.data['number_of_courses'] += 1
         self.data['full_program_price'] += float(run_mode['seats'][0]['price'])
         self.data['avg_price_per_course'] = self.data['full_program_price'] / self.data['number_of_courses']
