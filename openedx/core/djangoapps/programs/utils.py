@@ -249,6 +249,11 @@ class ProgramDataExtender(object):
         self.course_overview = None
         self.enrollment_start = None
 
+        # Values for programs' price calculation.
+        self.data['avg_price_per_course'] = 0
+        self.data['number_of_courses'] = 0
+        self.data['full_program_price'] = 0
+
     def extend(self, include_instructors=False):
         """Execute extension handlers, returning the extended data."""
         if include_instructors:
@@ -309,6 +314,11 @@ class ProgramDataExtender(object):
     def _attach_course_run_is_enrollment_open(self, run_mode):
         enrollment_end = self.course_overview.enrollment_end or datetime.datetime.max.replace(tzinfo=utc)
         run_mode['is_enrollment_open'] = self.enrollment_start <= datetime.datetime.now(utc) < enrollment_end
+
+    def _attach_average_course_price(self, run_mode):
+        self.data['number_of_courses'] += 1
+        self.data['full_program_price'] += float(run_mode['seats'][0]['price'])
+        self.data['avg_price_per_course'] = self.data['full_program_price'] / self.data['number_of_courses']
 
     def _attach_course_run_advertised_start(self, run_mode):
         """
