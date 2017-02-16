@@ -205,7 +205,6 @@ class BokChoyTestSuite(TestSuite):
         self.coveragerc = kwargs.get('coveragerc', None)
         self.save_screenshots = kwargs.get('save_screenshots', False)
 
-
     def __enter__(self):
         super(BokChoyTestSuite, self).__enter__()
 
