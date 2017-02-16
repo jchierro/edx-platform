@@ -619,7 +619,7 @@ class DiscussionBoardFragmentView(EdxFragmentView):
             fragment.add_javascript(inline_js)
             return fragment
         except cc.utils.CommentClientMaintenanceError:
-            log.warning("Forum is in maintenance mode")
+            log.warning('Forum is in maintenance mode')
             html = render_to_response('discussion/maintenance_fragment.html', {
                 'disable_courseware_js': True,
                 'uses_pattern_library': True,
