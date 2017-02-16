@@ -478,10 +478,7 @@ class CourseTabView(View):
         course_key = CourseKey.from_string(course_id)
         course = get_course_with_access(request.user, 'load', course_key)
         tab = [tab for tab in course.tabs if tab.type == tab_type][0]
-        try:
-            fragment = tab.render_fragment(request, course, **kwargs)
-        except:
-
+        fragment = tab.render_fragment(request, course, **kwargs)
 
         response_format = request.GET.get('format') or request.POST.get('format') or 'html'
         if response_format == 'json' or WEB_FRAGMENT_RESPONSE_TYPE in request.META.get('HTTP_ACCEPT', 'text/html'):
