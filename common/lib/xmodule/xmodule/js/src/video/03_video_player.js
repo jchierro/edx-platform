@@ -2,8 +2,8 @@
 // VideoPlayer module.
     define(
 'video/03_video_player.js',
-['video/02_html5_video.js', 'video/02_html5_hls_video.js', 'video/00_resizer.js'],
-function(HTML5Video, HTML5HLSVideo, Resizer) {
+['video/02_html5_video.js', 'video/02_html5_hls_video.js', 'video/00_resizer.js', 'hls'],
+function(HTML5Video, HTML5HLSVideo, Resizer, HLS) {
     var dfd = $.Deferred(),
         VideoPlayer = function(state) {
             state.videoPlayer = {};
@@ -156,7 +156,25 @@ function(HTML5Video, HTML5HLSVideo, Resizer) {
         state.browserIsSafari = (userAgent.indexOf('safari') > -1 &&
                                  !state.browserIsChrome);
 
-        if (state.videoType === 'html5') {
+        // Browser can play HLS videos if either it support `Media Source Extensions`
+        // feature or browser is safari(has native support for HLS)
+        state.canPlayHLS = state.HLSVideoSources.length > 0 && (HLS.isSupported() || state.browserIsSafari);
+
+        if (state.canPlayHLS) {
+            state.videoPlayer.player = new HTML5HLSVideo.Player(state.el, {
+                playerVars: state.videoPlayer.playerVars,
+                videoSources: state.HLSVideoSources,
+                browserIsSafari: state.browserIsSafari,
+                events: {
+                    onReady: state.videoPlayer.onReady,
+                    onStateChange: state.videoPlayer.onStateChange,
+                    onError: state.videoPlayer.onError
+                }
+            });
+
+            player = state.videoEl = state.videoPlayer.player.videoEl;
+            player[0].addEventListener('loadedmetadata', state.videoPlayer.onLoadMetadataHtml5, false);
+        } else if (state.videoType === 'html5') {
             state.videoPlayer.player = new HTML5Video.Player(state.el, {
                 playerVars: state.videoPlayer.playerVars,
                 videoSources: state.config.sources,

@@ -14,8 +14,8 @@
 (function(requirejs, require, define) {
     define(
 'video/01_initialize.js',
-['video/03_video_player.js', 'video/00_i18n.js', 'moment', 'underscore'],
-function(VideoPlayer, i18n, moment, _) {
+['video/03_video_player.js', 'video/00_i18n.js', 'moment', 'underscore', 'underscore.string'],
+function(VideoPlayer, i18n, moment, _, str) {
     var moment = moment || window.moment;
     /**
      * @function
@@ -278,6 +278,13 @@ function(VideoPlayer, i18n, moment, _) {
         return false;
     }
 
+    // Return Array of available HLS video source urls.
+    function _HLSVideoSources(state) {
+        return _.filter(state.config.sources, function(source) {
+            return str.endsWith(source, '.m3u8');
+        });
+    }
+
     // function _prepareHTML5Video(state)
     // The function prepare HTML5 video, parse HTML5
     // video sources etc.
@@ -325,6 +332,7 @@ function(VideoPlayer, i18n, moment, _) {
         state.controlHideTimeout = null;
         state.captionState = 'invisible';
         state.captionHideTimeout = null;
+        state.HLSVideoSources = _HLSVideoSources(state);
     }
 
     function _initializeModules(state, i18n) {
@@ -559,7 +567,9 @@ function(VideoPlayer, i18n, moment, _) {
 
         _setConfigurations(this);
 
-        if (!(_parseYouTubeIDs(this))) {
+        // TODO! better check to HLS availability
+        // state.HLSVideoSources.length > 0 && (HLS.isSupported() || state.browserIsSafari); ???
+        if (this.HLSVideoSources.length > 0 || !(_parseYouTubeIDs(this))) {
             // If we do not have YouTube ID's, try parsing HTML5 video sources.
             if (!_prepareHTML5Video(this)) {
                 __dfd__.reject();

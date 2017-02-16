@@ -171,6 +171,13 @@ function(_) {
             this.logs = [];
             this.el = $(el);
 
+            // Because of problems with creating video element via jquery
+            // (http://bugs.jquery.com/ticket/9174) we create it using native JS.
+            this.video = document.createElement('video');
+
+            // Get the jQuery object and set error event handlers
+            this.videoEl = $(this.video);
+
             // The player state is used by other parts of the VideoPlayer to
             // determine what the video is currently doing.
             this.playerState = HTML5Video.PlayerState.UNSTARTED;
@@ -285,26 +292,21 @@ function(_) {
                 ].join('');
             });
 
+            // do common initialization independent of player type
+            this.init(el, config);
+
             // Create HTML markup for the <video> element, populating it with
             // sources from previous step. Set playback not supported error message.
-            // Because of problems with creating video element via jquery
-            // (http://bugs.jquery.com/ticket/9174) we create it using native JS.
-            this.video = document.createElement('video');
             errorMessage = [
                 gettext('This browser cannot play .mp4, .ogg, or .webm files.'),
                 gettext('Try using a different browser, such as Google Chrome.')
             ].join('');
             this.video.innerHTML = sourceList.join('') + errorMessage;
 
-            // Get the jQuery object and set error event handlers
-            this.videoEl = $(this.video);
             lastSource = this.videoEl.find('source').last();
             lastSource.on('error', this.showErrorMessage.bind(this));
             lastSource.on('error', this.onError.bind(this));
             this.videoEl.on('error', this.onError.bind(this));
-
-            // do common initialization independent of player type
-            this.init(el, config);
         }
     }());
 

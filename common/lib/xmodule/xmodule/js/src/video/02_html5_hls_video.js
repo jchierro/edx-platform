@@ -10,17 +10,26 @@
 
         HLSVideo.Player = (function() {
             function PlayerHLS(el, config) {
-                this.video = document.createElement('video');
-                this.videoEl = $(this.video);
+                var self = this;
 
-                this.hls = new HLS();
-                this.hls.loadSource('http://www.streambox.fr/playlists/test_001/stream.m3u8');
-                this.hls.attachMedia(this.video);
-                this.hls.on(HLS.Events.MANIFEST_PARSED, function(data) {
-                    console.log(data);
-                });
-
+                // do common initialization independent of player type
                 this.init(el, config);
+
+                // Safari has native support to play HLS videos
+                if (config.browserIsSafari) {
+                    this.videoEl.attr('src', config.videoSources[0]);
+                } else {
+                    this.hls = new HLS();
+                    this.hls.attachMedia(this.video);
+                    this.hls.on(HLS.Events.MEDIA_ATTACHED, function() {
+                        self.hls.loadSource(config.videoSources[0]);
+                        self.hls.on(HLS.Events.MANIFEST_PARSED, function(event, data) {
+                            console.log(
+                                '[Video info]: manifest loaded, found ' + data.levels.length + ' quality level'
+                            );
+                        });
+                    });
+                }
             }
 
             PlayerHLS.prototype = Object.create(HTML5Video.Player.prototype);
