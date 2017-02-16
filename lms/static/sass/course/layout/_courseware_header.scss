@@ -4,7 +4,7 @@
   @extend %ui-print-excluded;
 
   border-bottom: none;
-  margin: 0 auto 0;
+  margin: ($baseline / 2) auto 0;
   padding: 0;
   width: 100%;
 
