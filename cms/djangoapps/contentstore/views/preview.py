@@ -57,6 +57,7 @@ def preview_handler(request, usage_key_string, handler, suffix=''):
     """
     usage_key = UsageKey.from_string(usage_key_string)
 
+    asides = []
     if isinstance(usage_key, (AsideUsageKeyV1, AsideUsageKeyV2)):
         descriptor = modulestore().get_item(usage_key.usage_key)
         for aside in descriptor.runtime.get_asides(descriptor):
@@ -67,7 +68,6 @@ def preview_handler(request, usage_key_string, handler, suffix=''):
     else:
         descriptor = modulestore().get_item(usage_key)
         instance = _load_preview_module(request, descriptor)
-        asides = []
 
     # Let the module handle the AJAX
     req = django_to_webob_request(request)
@@ -91,7 +91,9 @@ def preview_handler(request, usage_key_string, handler, suffix=''):
         log.exception("error processing ajax call")
         raise
 
-    modulestore().update_item(descriptor, request.user.id, asides=asides)
+    if asides:
+        modulestore().update_item(descriptor, request.user.id, asides=asides)
+
     return webob_to_django_response(resp)
 
 
