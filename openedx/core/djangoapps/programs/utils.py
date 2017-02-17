@@ -357,8 +357,9 @@ class ProgramMarketingDataExtender(ProgramDataExtender):
 
     def extend(self):
         """Execute extension handlers, returning the extended data."""
-        self._execute('_extend_course_runs')
+        super(ProgramMarketingDataExtender, self).extend()
         self._execute('_extend_with_instructors')
+        self._execute('_extend_with_courses')
         return self.data
 
     @classmethod
@@ -369,10 +370,16 @@ class ProgramMarketingDataExtender(ProgramDataExtender):
     def _extend_with_instructors(self):
         self._execute('_attach_instructors')
 
-    def _attach_course_run_course_price(self, run_mode):
-        self.data['number_of_courses'] += 1
-        if run_mode['seats']:
-            self.data['full_program_price'] += float(run_mode['seats'][0]['price'])
+    def _extend_with_courses(self):
+        for course in self.data['courses']:
+            self._execute('_attach_single_course', course)
+
+    def _attach_single_course_price(self, course):
+        course_run = course['course_runs'][0] if course['course_runs'] else None
+        if course_run:
+            self.data['number_of_courses'] += 1
+            if course_run['seats']:
+                self.data['full_program_price'] += float(course_run['seats'][0]['price'])
             self.data['avg_price_per_course'] = self.data['full_program_price'] / self.data['number_of_courses']
 
     def _attach_course_run_can_enroll(self, run_mode):
