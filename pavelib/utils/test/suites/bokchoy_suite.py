@@ -415,5 +415,8 @@ class Pa11yCrawler(BokChoyTestSuite):
                 "-a",
                 "single_url={url}".format(url=self.single_url),
             ]
-        else:
-            return basic_command
+
+        return basic_command + [
+            "-a",
+            "port=8003",
+        ]
