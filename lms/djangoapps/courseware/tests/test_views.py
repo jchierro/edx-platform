@@ -357,9 +357,9 @@ class ViewsTestCase(ModuleStoreTestCase):
         self.assertEqual(response.status_code, 404)
 
         with mock.patch("courseware.views.views.get_programs") as patched_get_programs:
-            with mock.patch("courseware.views.views.ProgramDataExtender") as patched_program_data_extender_class:
+            with mock.patch("courseware.views.views.ProgramMarketingDataExtender") as patched_program_extender_class:
                 patched_get_programs.return_value = mock_program_data.PROGRAM
-                patched_program_data_extender_class.extend.return_value = mock_program_data.PROGRAM
+                patched_program_extender_class.extend.return_value = mock_program_data.PROGRAM
                 response = self.client.get(url)
                 self.assertEqual(response.status_code, 200)
                 self.assertNotIn(program_detail, response.content)

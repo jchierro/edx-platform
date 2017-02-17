@@ -582,9 +582,7 @@ class TestProgramMarketingDataExtender(ModuleStoreTestCase):
         self.course_price = 100
         self.number_of_course = 2
         self.program = ProgramFactory(
-            courses=[
-                self._create_course(self.course_price) for __ in range(self.number_of_course)
-                ]
+            courses=[self._create_course(self.course_price) for __ in range(self.number_of_course)]
         )
 
     def _create_course(self, course_price):
