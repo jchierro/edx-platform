@@ -397,31 +397,23 @@ class Pa11yCrawler(BokChoyTestSuite):
         """
         data_dir = os.path.join(self.report_dir, 'data')
         url = "https://raw.githubusercontent.com/edx/pa11ycrawler-ignore/master/ignore.yaml"
+
+        basic_command = [
+            "scrapy",
+            "crawl",
+            "edx",
+            "-a",
+            "course_key={key}".format(key=self.course_key),
+            "-a",
+            "pa11y_ignore_rules_url={url}".format(url=url),
+            "-a",
+            "data_dir={dir}".format(dir=data_dir),
+        ]
+
         if self.single_url:
-            return [
-                "scrapy",
-                "crawl",
-                "edx",
-                "-a",
-                "course_key={key}".format(key=self.course_key),
-                "-a",
-                "pa11y_ignore_rules_url={url}".format(url=url),
-                "-a",
-                "data_dir={dir}".format(dir=data_dir),
+            return basic_command + [
                 "-a",
                 "single_url={url}".format(url=self.single_url),
             ]
         else:
-            return [
-                "scrapy",
-                "crawl",
-                "edx",
-                "-a",
-                "port=8003",
-                "-a",
-                "course_key={key}".format(key=self.course_key),
-                "-a",
-                "pa11y_ignore_rules_url={url}".format(url=url),
-                "-a",
-                "data_dir={dir}".format(dir=data_dir)
-            ]
+            return basic_command
