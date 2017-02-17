@@ -52,7 +52,7 @@ from lms.djangoapps.commerce.utils import EcommerceService  # pylint: disable=im
 from milestones.tests.utils import MilestonesTestCaseMixin
 from openedx.core.djangoapps.self_paced.models import SelfPacedConfiguration
 from openedx.core.lib.gating import api as gating_api
-from openedx.core.djangoapps.programs.tests import mock_data
+from openedx.core.djangoapps.programs.tests import mock_program_data
 from openedx.core.djangoapps.crawlers.models import CrawlersConfig
 from student.models import CourseEnrollment
 from student.tests.factories import AdminFactory, UserFactory, CourseEnrollmentFactory
@@ -358,8 +358,8 @@ class ViewsTestCase(ModuleStoreTestCase):
 
         with mock.patch("courseware.views.views.get_programs") as patched_get_programs:
             with mock.patch("courseware.views.views.ProgramDataExtender") as patched_program_data_extender_class:
-                patched_get_programs.return_value = mock_data.PROGRAM_DATA
-                patched_program_data_extender_class.extend.return_value = mock_data.PROGRAM_DATA
+                patched_get_programs.return_value = mock_program_data.PROGRAM
+                patched_program_data_extender_class.extend.return_value = mock_program_data.PROGRAM
                 response = self.client.get(url)
                 self.assertEqual(response.status_code, 200)
                 self.assertNotIn(program_detail, response.content)

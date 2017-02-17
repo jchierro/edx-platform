@@ -2,7 +2,7 @@
 Mocked Program data for courseware.views.views.program_marketing view.
 """
 
-PROGRAM_DATA = [{
+PROGRAM = [{
     "uuid": "bf8dea72-4df3-4a99-b525-915e3f59193a",
     "title": "Test Program",
     "subtitle": "Test Subtitle",
