@@ -40,7 +40,7 @@
             'jasmine-imagediff': 'js/vendor/jasmine-imagediff',
             'URI': 'js/vendor/URI.min',
             'draggabilly': 'js/vendor/draggabilly',
-            'hls': 'common/js/vendor/hls.min'
+            'hls': 'common/js/vendor/hls'
         },
         shim: {
             'gettext': {

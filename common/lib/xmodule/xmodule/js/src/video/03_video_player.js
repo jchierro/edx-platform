@@ -2,8 +2,8 @@
 // VideoPlayer module.
     define(
 'video/03_video_player.js',
-['video/02_html5_video.js', 'video/02_html5_hls_video.js', 'video/00_resizer.js', 'hls'],
-function(HTML5Video, HTML5HLSVideo, Resizer, HLS) {
+['video/02_html5_video.js', 'video/02_html5_hls_video.js', 'video/00_resizer.js', 'hls', 'underscore'],
+function(HTML5Video, HTML5HLSVideo, Resizer, HLS, _) {
     var dfd = $.Deferred(),
         VideoPlayer = function(state) {
             state.videoPlayer = {};
@@ -101,7 +101,7 @@ function(HTML5Video, HTML5HLSVideo, Resizer, HLS) {
     //     via the 'state' object. Much easier to work this way - you don't
     //     have to do repeated jQuery element selects.
     function _initialize(state) {
-        var youTubeId, player, userAgent, commonConfig;
+        var youTubeId, player, userAgent, commonConfig, eventToBeTriggered;
 
         // The function is called just once to apply pre-defined configurations
         // by student before video starts playing. Waits until the video's
@@ -171,7 +171,20 @@ function(HTML5Video, HTML5HLSVideo, Resizer, HLS) {
             }
         };
 
-        if (state.videoType === 'youtube') {
+        if (state.videoType === 'html5') {
+            if (state.canPlayHLS) {
+                state.videoPlayer.player = new HTML5HLSVideo.Player(
+                    state.el,
+                    _.extend({}, commonConfig, {videoSources: state.HLSVideoSources})
+                );
+                eventToBeTriggered = 'canplay';
+            } else {
+                state.videoPlayer.player = new HTML5Video.Player(state.el, commonConfig);
+                eventToBeTriggered = 'loadedmetadata';
+            }
+            player = state.videoEl = state.videoPlayer.player.videoEl;
+            player[0].addEventListener(eventToBeTriggered, state.videoPlayer.onLoadMetadataHtml5, false);
+        } else if (state.videoType === 'youtube') {
             youTubeId = state.youtubeId();
 
             state.videoPlayer.player = new YT.Player(state.id, {
@@ -193,17 +206,6 @@ function(HTML5Video, HTML5HLSVideo, Resizer, HLS) {
                 _resize(state, videoWidth, videoHeight);
                 _updateVcrAndRegion(state, true);
             });
-        } else if (state.canPlayHLS) {
-            state.videoPlayer.player = new HTML5HLSVideo.Player(
-                state.el,
-                _.extend({}, commonConfig, {videoSources: state.HLSVideoSources})
-            );
-            player = state.videoEl = state.videoPlayer.player.videoEl;
-            player[0].addEventListener('canplay', state.videoPlayer.onLoadMetadataHtml5, false);
-        } else if (state.videoType === 'html5') {
-            state.videoPlayer.player = new HTML5Video.Player(state.el, commonConfig);
-            player = state.videoEl = state.videoPlayer.player.videoEl;
-            player[0].addEventListener('loadedmetadata', state.videoPlayer.onLoadMetadataHtml5, false);
         }
 
         if (state.isTouch) {

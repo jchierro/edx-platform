@@ -109,7 +109,7 @@
             'tinymce': 'js/vendor/tinymce/js/tinymce/tinymce.full.min',
             'jquery.tinymce': 'js/vendor/tinymce/js/tinymce/jquery.tinymce.min',
             'picturefill': 'common/js/vendor/picturefill',
-            'hls': 'common/js/vendor/hls.min'
+            'hls': 'common/js/vendor/hls'
             // end of files needed by OVA
         },
         shim: {
