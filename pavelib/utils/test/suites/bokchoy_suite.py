@@ -403,6 +403,8 @@ class Pa11yCrawler(BokChoyTestSuite):
             "crawl",
             "edx",
             "-a",
+            "port=8003",
+            "-a",
             "course_key={key}".format(key=self.course_key),
             "-a",
             "pa11y_ignore_rules_url={url}".format(url=url),
@@ -414,11 +416,6 @@ class Pa11yCrawler(BokChoyTestSuite):
             command = command + [
                 "-a",
                 "single_url={url}".format(url=self.single_url),
-            ]
-        else:
-            command = command + [
-                "-a",
-                "port=8003",
             ]
 
         return command
