@@ -166,12 +166,9 @@ def get_programs_with_type_logo():
     return programs_list
 
 
-def get_catalog_course_runs(course_keys=None):
+def get_catalog_course_runs():
     """
-    Retrieve course runs from the catalog service.
-
-    Keyword Arguments:
-        course_keys ([CourseKey]): A list of Course key objects to identify the course runs whose data we want.
+    Retrieve all the course runs from the catalog service.
 
     Returns:
         list of dict with each record representing a course run.
@@ -190,9 +187,6 @@ def get_catalog_course_runs(course_keys=None):
             'page_size': catalog_integration.page_size,
             'exclude_utm': 1,
         }
-
-        if course_keys:
-            querystring['keys'] = ','.join(course_keys)
 
         course_runs = get_edx_api_data(
             catalog_integration,
