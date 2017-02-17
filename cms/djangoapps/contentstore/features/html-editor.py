@@ -230,7 +230,7 @@ def font_selector_dropdown_is_shown(step):
 
 
 @step('"Default" option sets the expected font family')
-def default_options_sets_expected_font_family(step):
+def default_options_sets_expected_font_family(step):  # pylint: disable=unused-argument, redefined-outer-name
     fonts = get_available_fonts(get_fonts_list_panel(world))
     fonts_found = fonts.get("Default", None)
     expected_font_family = CUSTOM_FONTS.get('Default')
