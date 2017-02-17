@@ -366,8 +366,8 @@ class ProgramMarketingDataExtender(ProgramDataExtender):
         """Returns a generator yielding method names beginning with the given prefix."""
         return (name for name in chain(cls.__dict__, ProgramDataExtender.__dict__) if name.startswith(prefix))
 
-     def _extend_with_instructors(self):
-         self._execute('_attach_instructors')
+    def _extend_with_instructors(self):
+        self._execute('_attach_instructors')
 
     def _attach_course_run_course_price(self, run_mode):
         self.data['number_of_courses'] += 1
