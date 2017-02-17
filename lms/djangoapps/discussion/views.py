@@ -342,23 +342,24 @@ def _create_discussion_view_context(request, course_key):
     """
     Returns the default template context for rendering any discussion view.
     """
-    user = cc.User.from_django_user(request.user)
-    user_info = user.to_dict()
-    course = get_course_with_access(request.user, 'load', course_key, check_if_enrolled=True)
-    course_settings = make_course_settings(course, request.user)
+    user = request.user
+    cc_user = cc.User.from_django_user(user)
+    user_info = cc_user.to_dict()
+    course = get_course_with_access(user, 'load', course_key, check_if_enrolled=True)
+    course_settings = make_course_settings(course, user)
     return {
         'csrf': csrf(request)['csrf_token'],
         'course': course,
         'user': user,
         'user_info': user_info,
-        'staff_access': bool(has_access(request.user, 'staff', course)),
+        'staff_access': bool(has_access(user, 'staff', course)),
         'roles': utils.get_role_ids(course_key),
-        'can_create_comment': has_permission(request.user, "create_comment", course.id),
-        'can_create_subcomment': has_permission(request.user, "create_sub_comment", course.id),
-        'can_create_thread': has_permission(request.user, "create_thread", course.id),
+        'can_create_comment': has_permission(user, "create_comment", course.id),
+        'can_create_subcomment': has_permission(user, "create_sub_comment", course.id),
+        'can_create_thread': has_permission(user, "create_thread", course.id),
         'flag_moderator': bool(
-            has_permission(request.user, 'openclose_thread', course.id) or
-            has_access(request.user, 'staff', course)
+            has_permission(user, 'openclose_thread', course.id) or
+            has_access(user, 'staff', course)
         ),
         'course_settings': course_settings,
         'disable_courseware_js': True,
@@ -375,6 +376,7 @@ def _create_discussion_board_context(request, course_key, discussion_id=None, th
     course = context['course']
     course_settings = context['course_settings']
     user = context['user']
+    cc_user = cc.User.from_django_user(user)
     user_info = context['user_info']
     if thread_id:
         thread = _find_thread(request, course, discussion_id=discussion_id, thread_id=thread_id)
@@ -395,17 +397,17 @@ def _create_discussion_board_context(request, course_key, discussion_id=None, th
         threads, query_params = get_threads(request, course, user_info)   # This might process a search query
         thread_pages = query_params['num_pages']
         root_url = request.path
-    is_staff = has_permission(request.user, 'openclose_thread', course.id)
+    is_staff = has_permission(user, 'openclose_thread', course.id)
     threads = [utils.prepare_content(thread, course_key, is_staff) for thread in threads]
 
     with newrelic.agent.FunctionTrace(nr_transaction, "get_metadata_for_threads"):
-        annotated_content_info = utils.get_metadata_for_threads(course_key, threads, request.user, user_info)
+        annotated_content_info = utils.get_metadata_for_threads(course_key, threads, user, user_info)
 
     with newrelic.agent.FunctionTrace(nr_transaction, "add_courseware_context"):
-        add_courseware_context(threads, course, request.user)
+        add_courseware_context(threads, course, user)
 
     with newrelic.agent.FunctionTrace(nr_transaction, "get_cohort_info"):
-        user_cohort_id = get_cohort_id(request.user, course_key)
+        user_cohort_id = get_cohort_id(user, course_key)
 
     context.update({
         'root_url': root_url,
@@ -414,10 +416,10 @@ def _create_discussion_board_context(request, course_key, discussion_id=None, th
         'threads': threads,
         'thread_pages': thread_pages,
         'annotated_content_info': annotated_content_info,
-        'is_moderator': has_permission(request.user, "see_all_cohorts", course_key),
+        'is_moderator': has_permission(user, "see_all_cohorts", course_key),
         'cohorts': course_settings["cohorts"],  # still needed to render _thread_list_template
         'user_cohort': user_cohort_id,  # read from container in NewPostView
-        'sort_preference': user.default_sort_key,
+        'sort_preference': cc_user.default_sort_key,
         'category_map': course_settings["category_map"],
         'course_settings': course_settings,
     })
