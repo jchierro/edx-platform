@@ -43,9 +43,9 @@ class Registry(object):
         return sorted(cls._enabled_providers(), key=lambda provider: provider.name)
 
     @classmethod
-    def displayed_for_login(cls):
+    def displayed_for_login(cls, tpa_hint="no_tpa_hint_specified"):
         """Returns list of providers that can be used to initiate logins in the UI"""
-        return [provider for provider in cls.enabled() if provider.display_for_login]
+        return [provider for provider in cls.enabled() if provider.display_for_login or provider.provider_id == tpa_hint]
 
     @classmethod
     def get(cls, provider_id):
