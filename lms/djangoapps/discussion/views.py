@@ -390,9 +390,11 @@ def _create_discussion_board_context(request, course_key, discussion_id=None, th
             if "pinned" not in thread:
                 thread["pinned"] = False
         thread_pages = 1
+        root_url = reverse('forum_form_discussion', args=[unicode(course.id)])
     else:
         threads, query_params = get_threads(request, course, user_info)   # This might process a search query
         thread_pages = query_params['num_pages']
+        root_url = request.path
     is_staff = has_permission(request.user, 'openclose_thread', course.id)
     threads = [utils.prepare_content(thread, course_key, is_staff) for thread in threads]
 
@@ -406,6 +408,7 @@ def _create_discussion_board_context(request, course_key, discussion_id=None, th
         user_cohort_id = get_cohort_id(request.user, course_key)
 
     context.update({
+        'root_url': root_url,
         'discussion_id': discussion_id,
         'thread_id': thread_id,
         'threads': threads,
@@ -635,9 +638,6 @@ class DiscussionBoardFragmentView(EdxFragmentView):
         the files are loaded individually, but in production just the single bundle is loaded.
         """
         dependencies = Set()
-        # TODO: how can we get the base dependencies when not rendered within a page?
-        # dependencies.update(self.get_js_dependencies('base_vendor'))
-        # dependencies.update(self.get_js_dependencies('base_application'))
         dependencies.update(self.get_js_dependencies('discussion_vendor'))
         return list(dependencies)
 

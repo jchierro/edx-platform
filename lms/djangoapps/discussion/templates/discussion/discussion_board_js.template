@@ -47,7 +47,7 @@ discussion_classes = [
         DiscussionBoardFactory({
             courseId: '${unicode(course.id) | n, js_escaped_string}',
             $el: $(".discussion-board"),
-            root_url: '${request.path}',
+            root_url: '${root_url | n, js_escaped_string}',
             user_info: ${user_info | n, dump_js_escaped_json},
             roles: ${roles | n, dump_js_escaped_json},
             sort_preference: '${sort_preference | n, js_escaped_string}',
