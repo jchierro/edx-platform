@@ -230,7 +230,7 @@ def forum_form_discussion(request, course_key):
             is_staff = has_permission(request.user, 'openclose_thread', course.id)
             threads = [utils.prepare_content(thread, course_key, is_staff) for thread in unsafethreads]
         except cc.utils.CommentClientMaintenanceError:
-            raise HttpResponseServerError('Forum is in maintenance mode')
+            return HttpResponseServerError('Forum is in maintenance mode')
         except ValueError:
             return HttpResponseBadRequest("Invalid group_id")
 
@@ -320,13 +320,13 @@ def _find_thread(request, course, discussion_id, thread_id):
             response_skip=request.GET.get("resp_skip"),
             response_limit=request.GET.get("resp_limit")
         )
-    except cc.utils.CommentClientRequestError as error:
+    except cc.utils.CommentClientRequestError:
         return None
 
     # Verify that the student has access to this thread if belongs to a course discussion module
     thread_context = getattr(thread, "context", "course")
     if thread_context == "course" and not utils.discussion_category_id_access(course, request.user, discussion_id):
-        raise None
+        return None
 
     # verify that the thread belongs to the requesting student's cohort
     is_moderator = has_permission(request.user, "see_all_cohorts", course.id)
