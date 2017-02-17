@@ -10,6 +10,7 @@ from django.core.urlresolvers import reverse
 from django.utils.functional import cached_property
 from opaque_keys.edx.keys import CourseKey
 from pytz import utc
+from itertools import chain
 
 from course_modes.models import CourseMode
 from lms.djangoapps.certificates import api as certificate_api
@@ -249,17 +250,9 @@ class ProgramDataExtender(object):
         self.course_overview = None
         self.enrollment_start = None
 
-        # Values for programs' price calculation.
-        self.data['avg_price_per_course'] = 0
-        self.data['number_of_courses'] = 0
-        self.data['full_program_price'] = 0
-
-    def extend(self, include_instructors=False):
+    def extend(self):
         """Execute extension handlers, returning the extended data."""
-        if include_instructors:
-            self._execute('_extend')
-        else:
-            self._execute('_extend_course_runs')
+        self._execute('_extend_course_runs')
         return self.data
 
     def _execute(self, prefix, *args):
@@ -270,9 +263,6 @@ class ProgramDataExtender(object):
     def _handlers(cls, prefix):
         """Returns a generator yielding method names beginning with the given prefix."""
         return (name for name in cls.__dict__ if name.startswith(prefix))
-
-    def _extend_with_instructors(self):
-        self._execute('_attach_instructors')
 
     def _extend_course_runs(self):
         """Execute course run data handlers."""
@@ -315,11 +305,6 @@ class ProgramDataExtender(object):
         enrollment_end = self.course_overview.enrollment_end or datetime.datetime.max.replace(tzinfo=utc)
         run_mode['is_enrollment_open'] = self.enrollment_start <= datetime.datetime.now(utc) < enrollment_end
 
-    def _attach_course_run_course_price(self, run_mode):
-        self.data['number_of_courses'] += 1
-        self.data['full_program_price'] += float(run_mode['seats'][0]['price'])
-        self.data['avg_price_per_course'] = self.data['full_program_price'] / self.data['number_of_courses']
-
     def _attach_course_run_advertised_start(self, run_mode):
         """
         The advertised_start is text a course author can provide to be displayed
@@ -349,6 +334,46 @@ class ProgramDataExtender(object):
                 run_mode['upgrade_url'] = None
         else:
             run_mode['upgrade_url'] = None
+
+
+# pylint: disable=missing-docstring
+class ProgramMarketingDataExtender(ProgramDataExtender):
+    """
+    Utility for extending program marketing data meant for the program detail page
+    It also has user-specific data (e.g., CourseEnrollment) which you can find in
+    parent class ProgramDataExtender
+
+    Arguments:
+        program_data (dict): Representation of a program.
+        user (User): The user whose enrollments to inspect.
+    """
+    def __init__(self, program_data, user):
+        super(ProgramMarketingDataExtender, self).__init__(program_data, user)
+
+        # Values for programs' price calculation.
+        self.data['avg_price_per_course'] = 0
+        self.data['number_of_courses'] = 0
+        self.data['full_program_price'] = 0
+
+    def extend(self):
+        """Execute extension handlers, returning the extended data."""
+        self._execute('_extend_course_runs')
+        self._execute('_extend_with_instructors')
+        return self.data
+
+    @classmethod
+    def _handlers(cls, prefix):
+        """Returns a generator yielding method names beginning with the given prefix."""
+        return (name for name in chain(cls.__dict__, ProgramDataExtender.__dict__) if name.startswith(prefix))
+
+     def _extend_with_instructors(self):
+         self._execute('_attach_instructors')
+
+    def _attach_course_run_course_price(self, run_mode):
+        self.data['number_of_courses'] += 1
+        if run_mode['seats']:
+            self.data['full_program_price'] += float(run_mode['seats'][0]['price'])
+            self.data['avg_price_per_course'] = self.data['full_program_price'] / self.data['number_of_courses']
 
     def _attach_course_run_can_enroll(self, run_mode):
         run_mode['can_enroll'] = bool(has_access(self.user, 'enroll', self.course_overview))

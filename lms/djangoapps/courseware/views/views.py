@@ -78,7 +78,7 @@ from openedx.core.djangoapps.credit.api import (
     is_user_eligible_for_credit,
     is_credit_course
 )
-from openedx.core.djangoapps.programs.utils import ProgramDataExtender
+from openedx.core.djangoapps.programs.utils import ProgramMarketingDataExtender
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 from shoppingcart.utils import is_shopping_cart_enabled
 from openedx.core.djangoapps.self_paced.models import SelfPacedConfiguration
@@ -718,7 +718,7 @@ def program_marketing(request, program_uuid):
     if not program_data:
         raise Http404
 
-    program_data = ProgramDataExtender(program_data, request.user).extend(include_instructors=True)
+    program_data = ProgramMarketingDataExtender(program_data, request.user).extend()
 
     context = {
         'faq': program_data['faq'],
@@ -726,13 +726,13 @@ def program_marketing(request, program_uuid):
         'title': program_data['title'],
         'status': program_data['status'],
         'courses': program_data['courses'],
-        'avg_price_per_course': program_data['avg_price_per_course'],
-        'full_program_price': program_data['full_program_price'],
         'subtitle': program_data['subtitle'],
         'overview': program_data['overview'],
         'instructors': program_data['instructors'],
         'job_outlook_items': program_data['job_outlook_items'],
         'weeks_to_complete': program_data['weeks_to_complete'],
+        'full_program_price': program_data['full_program_price'],
+        'avg_price_per_course': program_data['avg_price_per_course'],
         'individual_endorsements': program_data['individual_endorsements'],
         'expected_learning_items': program_data['expected_learning_items'],
         'authoring_organizations': program_data['authoring_organizations'],
