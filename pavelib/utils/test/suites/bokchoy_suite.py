@@ -398,7 +398,7 @@ class Pa11yCrawler(BokChoyTestSuite):
         data_dir = os.path.join(self.report_dir, 'data')
         url = "https://raw.githubusercontent.com/edx/pa11ycrawler-ignore/master/ignore.yaml"
 
-        basic_command = [
+        command = [
             "scrapy",
             "crawl",
             "edx",
@@ -411,12 +411,14 @@ class Pa11yCrawler(BokChoyTestSuite):
         ]
 
         if self.single_url:
-            return basic_command + [
+            command = command + [
                 "-a",
                 "single_url={url}".format(url=self.single_url),
             ]
+        else:
+            command = command + [
+                "-a",
+                "port=8003",
+            ]
 
-        return basic_command + [
-            "-a",
-            "port=8003",
-        ]
+        return command
