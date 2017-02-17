@@ -4,6 +4,7 @@ Models used by the block structure framework.
 
 from django.db import models
 from openedx.core.djangoapps.xmodule_django.models import UsageKeyField
+from openedx.core.lib.block_structure.exceptions import BlockStructureNotFound
 
 
 class BlockStructure(models.Model):
@@ -38,23 +39,28 @@ class BlockStructure(models.Model):
         max_length=255,
     )
 
-    collected_data = models.FileField()
+    data = models.FileField()
+
+    def get_serialized_data(self):
+        """
+        Returns the collected data for this instance.
+        """
+        return self.data.read()
 
     @classmethod
     def get_current(cls, data_usage_key):
         """
         Returns the entry associated with the given data_usage_key.
+        Raises:
+             BlockStructureNotFound if an entry for data_usage_key is not found.
         """
-        return cls.objects.get(data_usage_key=data_usage_key)
-
-    def get_collected_data(self):
-        """
-        Returns the collected data for this instance.
-        """
-        return self.collected_data.read()
+        try:
+            return cls.objects.get(data_usage_key=data_usage_key)
+        except cls.DoesNotExist:
+            raise BlockStructureNotFound(data_usage_key)
 
     @classmethod
-    def update_or_create_with_data(cls, collected_content, **kwargs):
+    def update_or_create_with_data(cls, serialized_data, **kwargs):
         """
         """
         cls.objects.update_or_create(**kwargs)

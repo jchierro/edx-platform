@@ -86,7 +86,7 @@ class BlockStructureFactory(object):
         """
         block_structure = block_structure_cache.get(root_block_usage_key)
         if block_structure is None:
-            raise BlockStructureNotFound('Block structure for {} not found in the cache.'.format(root_block_usage_key))
+            raise BlockStructureNotFound(root_block_usage_key)
         return block_structure
 
     @classmethod
