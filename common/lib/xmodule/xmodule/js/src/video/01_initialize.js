@@ -14,8 +14,8 @@
 (function(requirejs, require, define) {
     define(
 'video/01_initialize.js',
-['video/03_video_player.js', 'video/00_i18n.js', 'moment', 'underscore', 'underscore.string'],
-function(VideoPlayer, i18n, moment, _, str) {
+['video/03_video_player.js', 'video/00_i18n.js', 'moment', 'underscore'],
+function(VideoPlayer, i18n, moment, _) {
     var moment = moment || window.moment;
     /**
      * @function
@@ -281,7 +281,7 @@ function(VideoPlayer, i18n, moment, _, str) {
     // Return Array of available HLS video source urls.
     function _HLSVideoSources(state) {
         return _.filter(state.config.sources, function(source) {
-            return str.endsWith(source, '.m3u8');
+            return /\.m3u8$/.test(source);
         });
     }
 
@@ -567,9 +567,7 @@ function(VideoPlayer, i18n, moment, _, str) {
 
         _setConfigurations(this);
 
-        // TODO! better check to HLS availability
-        // state.HLSVideoSources.length > 0 && (HLS.isSupported() || state.browserIsSafari); ???
-        if (this.HLSVideoSources.length > 0 || !(_parseYouTubeIDs(this))) {
+        if (!(_parseYouTubeIDs(this))) {
             // If we do not have YouTube ID's, try parsing HTML5 video sources.
             if (!_prepareHTML5Video(this)) {
                 __dfd__.reject();

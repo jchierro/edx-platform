@@ -101,7 +101,7 @@ function(HTML5Video, HTML5HLSVideo, Resizer, HLS) {
     //     via the 'state' object. Much easier to work this way - you don't
     //     have to do repeated jQuery element selects.
     function _initialize(state) {
-        var youTubeId, player, userAgent;
+        var youTubeId, player, userAgent, commonConfig;
 
         // The function is called just once to apply pre-defined configurations
         // by student before video starts playing. Waits until the video's
@@ -156,38 +156,22 @@ function(HTML5Video, HTML5HLSVideo, Resizer, HLS) {
         state.browserIsSafari = (userAgent.indexOf('safari') > -1 &&
                                  !state.browserIsChrome);
 
-        // Browser can play HLS videos if either it support `Media Source Extensions`
-        // feature or browser is safari(has native support for HLS)
+        // Browser can play HLS videos if either `Media Source Extensions`
+        // feature is supported or browser is safari (native HLS support)
         state.canPlayHLS = state.HLSVideoSources.length > 0 && (HLS.isSupported() || state.browserIsSafari);
 
-        if (state.canPlayHLS) {
-            state.videoPlayer.player = new HTML5HLSVideo.Player(state.el, {
-                playerVars: state.videoPlayer.playerVars,
-                videoSources: state.HLSVideoSources,
-                browserIsSafari: state.browserIsSafari,
-                events: {
-                    onReady: state.videoPlayer.onReady,
-                    onStateChange: state.videoPlayer.onStateChange,
-                    onError: state.videoPlayer.onError
-                }
-            });
+        commonConfig = {
+            playerVars: state.videoPlayer.playerVars,
+            videoSources: state.config.sources,
+            browserIsSafari: state.browserIsSafari,
+            events: {
+                onReady: state.videoPlayer.onReady,
+                onStateChange: state.videoPlayer.onStateChange,
+                onError: state.videoPlayer.onError
+            }
+        };
 
-            player = state.videoEl = state.videoPlayer.player.videoEl;
-            player[0].addEventListener('loadedmetadata', state.videoPlayer.onLoadMetadataHtml5, false);
-        } else if (state.videoType === 'html5') {
-            state.videoPlayer.player = new HTML5Video.Player(state.el, {
-                playerVars: state.videoPlayer.playerVars,
-                videoSources: state.config.sources,
-                events: {
-                    onReady: state.videoPlayer.onReady,
-                    onStateChange: state.videoPlayer.onStateChange,
-                    onError: state.videoPlayer.onError
-                }
-            });
-
-            player = state.videoEl = state.videoPlayer.player.videoEl;
-            player[0].addEventListener('loadedmetadata', state.videoPlayer.onLoadMetadataHtml5, false);
-        } else {
+        if (state.videoType === 'youtube') {
             youTubeId = state.youtubeId();
 
             state.videoPlayer.player = new YT.Player(state.id, {
@@ -209,6 +193,17 @@ function(HTML5Video, HTML5HLSVideo, Resizer, HLS) {
                 _resize(state, videoWidth, videoHeight);
                 _updateVcrAndRegion(state, true);
             });
+        } else if (state.canPlayHLS) {
+            state.videoPlayer.player = new HTML5HLSVideo.Player(
+                state.el,
+                _.extend({}, commonConfig, {videoSources: state.HLSVideoSources})
+            );
+            player = state.videoEl = state.videoPlayer.player.videoEl;
+            player[0].addEventListener('canplay', state.videoPlayer.onLoadMetadataHtml5, false);
+        } else if (state.videoType === 'html5') {
+            state.videoPlayer.player = new HTML5Video.Player(state.el, commonConfig);
+            player = state.videoEl = state.videoPlayer.player.videoEl;
+            player[0].addEventListener('loadedmetadata', state.videoPlayer.onLoadMetadataHtml5, false);
         }
 
         if (state.isTouch) {
